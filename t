@@ -130,3 +130,65 @@ Once this process is complete, the Master List will be updated with the correct 
 
 Let me know if you'd like further clarification on any part!
 
+If you don't need to check if the attribute already exists, the flow can be simplified. Here’s how you can modify step 5 to simply increment the count for each unique "Attribute A" (let’s call it "Business Case"):
+
+Simplified Step 5: Increment Group Count Directly
+
+1. Set Variable Action:
+
+Use the “Append to array variable” action to add each unique “Business Case” and its count to the varGroupedItems array.
+
+Expression for the "Append to array variable" value:
+
+
+{
+    "Business Case": items('Apply_to_each')?['Business Case'],
+    "Count": 1
+}
+
+
+2. Grouping and Summing Counts:
+
+After the "Apply to each" loop, use the Select action followed by the Compose action to group and sum the counts for each unique "Business Case".
+
+Select Action:
+
+From: varGroupedItems
+
+Map: Business Case = item()?['Business Case'], Count = item()?['Count']
+
+
+Compose Action:
+
+Expression:
+
+
+union(
+  select(outputs('Select'), 'Business Case'),
+  length(filter(outputs('Select'), item()?['Business Case'] eq item()?['Business Case']))
+)
+
+
+
+
+Additional Steps for Updating the Master List
+
+1. Apply to Each for Unique Grouped Items:
+
+Use the unique list created from the grouping step.
+
+For each unique “Business Case”, get the corresponding item from the Master List.
+
+
+
+2. Update or Create Item in Master List:
+
+If the item exists, update its count.
+
+If not, create a new item with the “Business Case” and its count.
+
+
+
+
+This approach simplifies the flow by avoiding unnecessary checks and directly grouping items by the “Business Case” attribute.
+
